@@ -45,6 +45,7 @@ class YOLODetector:
     Attributes:
         opt (Opt): 配置参数实例。
     """
+
     def __init__(self, opt: Opt):
         """初始化YOLO模型。
 
@@ -75,6 +76,7 @@ class YOLODetector:
 class LeafClassifier:
     """叶片分类器类，处理叶片的健康和病害分类
     """
+
     def __init__(self, opt: Opt, detector: YOLODetector):
         """初始化叶片分类器，创建输出文件夹。
 
@@ -157,22 +159,21 @@ class LeafClassifier:
         # 计算H通道在150到180范围内的像素数量
         h_pixels_in_range_150_180 = np.sum((h[mask] >= 150) & (h[mask] <= 180))
 
-        green_mask = cv2.inRange(hsv_image, self.opt.lower_green, self.opt.upper_green)
+        green_mask = cv2.inRange(hsv_image, self.opt.lower_green, self.opt.upper_green)  # 绿色掩码
         mask_green = (hsv_image[:, :, 0] >= 35) & (hsv_image[:, :, 0] <= 85) & \
-                     (hsv_image[:, :, 1] > 40) & (hsv_image[:, :, 2] > 40)
+                     (hsv_image[:, :, 1] > 40) & (hsv_image[:, :, 2] > 40)  # 绿色掩码 用于计算绿色占比 目前没采用
 
         mean_h = np.mean(h[mask])
         mean_s = np.mean(s[mask])
-        self.mark_leaf_type(img, mask_resize, box, mean_h, mean_s, h_pixels_in_range_150_180)  # 标记叶片类型
+        self.mark_leaf_type(img, box, mean_h, mean_s, h_pixels_in_range_150_180)  # 标记叶片类型
 
         return mask_resize
 
-    def mark_leaf_type(self, img, mask_resize, box, mean_h, mean_s, h_pixels_in_range_150_180):
+    def mark_leaf_type(self, img, box, mean_h, mean_s, h_pixels_in_range_150_180):
         """根据H和S通道的均值标记叶片类型
 
         Args:
             img: 原始图片
-            mask_resize: 当前掩膜
             box: 当前实例的边界框
             mean_h: H通道的均值
             mean_s: S通道的均值
@@ -181,7 +182,8 @@ class LeafClassifier:
         x1, y1, x2, y2 = box.astype(int)
         color = np.array(random_color())
 
-        if self.opt.H_min <= mean_h <= self.opt.H_max and self.opt.S_min <= mean_s <= self.opt.S_max and h_pixels_in_range_150_180 <= 200:
+        if (self.opt.H_min <= mean_h <= self.opt.H_max and self.opt.S_min <= mean_s <= self.opt.S_max and
+                h_pixels_in_range_150_180 <= 200):
             cv2.putText(img, 'Healthyleaf', (x1, y1), cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=3, color=color.tolist(), thickness=8)
         else:
