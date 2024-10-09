@@ -11,4 +11,9 @@
 - 分析结果：`save`
 - 测试图片：`test_pic`
 - 权重文件：`weight`
+- 四个版本的数据集训练结果和日志：`sickleaf_and_healthyleaf_v0*`
+- 预测视频代码：`predict_seg_video.py`
+- 预测图片代码(原)：`predict_seg_image.py`
+- 预测图片代码(每个叶片不一样的颜色掩膜，病害叶片有矩形框)：`predict_leaf.py`
+- 测试视频：`test.mp4`
 
