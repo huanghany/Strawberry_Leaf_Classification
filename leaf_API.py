@@ -34,6 +34,8 @@ class Opt:
     H_max: int = 59
     S_min: int = 105
     S_max: int = 165
+    save: bool = False
+    show: bool = False
     lower_green: np.ndarray = field(default_factory=lambda: np.array([35, 40, 40]))
     upper_green: np.ndarray = field(default_factory=lambda: np.array([85, 255, 255]))
 
@@ -130,7 +132,10 @@ class LeafClassifier:
         for i in range(masks.shape[0]):
             mask_resize = self.analyze_hsv(img, masks[i], boxes[i])  # 分析HSV
             if mask_resize is not None:
-                self.save_results(img, img_1, mask_resize, filename)  # 保存结果
+                if self.opt.save:
+                    self.save_results(img, img_1, mask_resize, filename)  # 保存结果
+                if self.opt.show:
+                    self.show_results(img, img_1, mask_resize)
 
     def analyze_hsv(self, img, mask, box):
         """分析图片的HSV值并标记叶片类型
@@ -206,6 +211,20 @@ class LeafClassifier:
         cv2.imwrite(output_img_path, img_1)
         print(f'保存处理后的图片到: {output_img_path}')
 
+    def show_results(self, img, img_1, mask_resize):
+        """显示处理后的图片
+
+        Args:
+            img: 原始图片
+            img_1: 处理后的图片
+            mask_resize: 当前掩膜
+        """
+        color = np.array(random_color())
+        img_1[mask_resize] = img[mask_resize] * 0.5 + color * 0.5
+        cv2.namedWindow('img', 0)
+        cv2.imshow('img', img_1)
+        cv2.waitKey(0)
+
 
 def parse_args():
     """解析命令行参数
@@ -225,7 +244,8 @@ def parse_args():
     parser.add_argument('--H_max', type=int, default=59, help='Maximum H value for healthy leaf classification.')
     parser.add_argument('--S_min', type=int, default=105, help='Minimum S value for healthy leaf classification.')
     parser.add_argument('--S_max', type=int, default=165, help='Maximum S value for healthy leaf classification.')
-
+    parser.add_argument('--save', type=bool, default=False, help='Whether to save the results.')
+    parser.add_argument('--show', type=bool, default=False, help='Whether to show the results.')
     return parser.parse_args()
 
 
@@ -243,7 +263,9 @@ if __name__ == '__main__':
         H_min=args.H_min,
         H_max=args.H_max,
         S_min=args.S_min,
-        S_max=args.S_max
+        S_max=args.S_max,
+        save=False,
+        show=True
     )
 
     # 初始化YOLO检测器
